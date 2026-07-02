@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>60 Flashcards - Valoración Clínica (PLACE)</title>
+    <style>
+        :root {
+            --bg: #f8fafc;
+            --primary: #0284c7;
+            --primary-dark: #0369a1;
+            --front-bg: #ffffff;
+            --back-bg: #f0fdf4;
+            --text: #0f172a;
+            --muted: #64748b;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: system-ui, -apple-system, sans-serif; }
+        body { background: var(--bg); color: var(--text); padding: 20px; display: flex; flex-direction: column; align-items: center; min-height: 100vh; }
+        header { margin-bottom: 25px; text-align: center; max-width: 700px; }
+        header h1 { color: var(--primary-dark); margin-bottom: 8px; font-size: 1.75rem; }
+        header p { color: var(--muted); font-size: 0.95rem; }
+        .filter-container { margin-bottom: 20px; display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; }
+        .filter-btn { background: #fff; border: 1px solid #cbd5e1; color: #475569; padding: 6px 14px; border-radius: 9999px; cursor: pointer; font-weight: 600; font-size: 0.8rem; transition: all 0.2s ease; }
+        .filter-btn.active, .filter-btn:hover { background: var(--primary); color: #fff; border-color: var(--primary); }
+        .stats { margin-bottom: 15px; font-size: 0.9rem; color: var(--muted); font-weight: 600; }
+        .grid-container { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 16px; width: 100%; max-width: 1200px; }
+        .flashcard { height: 220px; cursor: pointer; perspective: 1000px; }
+        .card-inner { position: relative; width: 100%; height: 100%; text-align: center; transition: transform 0.4s; transform-style: preserve-3d; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05), 0 2px 4px -1px rgba(0,0,0,0.03); }
+        .flashcard.flipped .card-inner { transform: rotateY(180deg); }
+        .card-front, .card-back { position: absolute; width: 100%; height: 100%; backface-visibility: hidden; -webkit-backface-visibility: hidden; border-radius: 12px; padding: 20px; display: flex; flex-direction: column; justify-content: center; align-items: center; border: 1px solid #e2e8f0; }
+        .card-front { background: var(--front-bg); border-top: 4px solid var(--primary); }
+        .card-back { background: var(--back-bg); transform: rotateY(180deg); border-top: 4px solid #16a34a; }
+        .category-tag { position: absolute; top: 12px; right: 12px; background: #e0f2fe; color: var(--primary); font-size: 0.65rem; padding: 3px 8px; border-radius: 6px; font-weight: 700; text-transform: uppercase; }
+        .question { font-size: 0.95rem; font-weight: 600; line-height: 1.4; color: #1e293b; }
+        .answer { font-size: 0.85rem; color: #334155; line-height: 1.45; width: 100%; font-weight: 500; text-align: left; }
+        .hint { margin-top: 12px; font-size: 0.7rem; color: var(--muted); font-style: italic; }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>Fichas Oficiales: Valoración Clínica</h1>
+        <p>Banco interactivo completo de 60 preguntas basadas rigurosamente en el documento proporcionado.</p>
+    </header>
+
+    <div class="filter-container">
+        <button class="filter-btn active" onclick="filterCards('todos')">Todos (60)</button>
+        <button class="filter-btn" onclick="filterCards('bloqueA')">Bloque A: Conceptos</button>
+        <button class="filter-btn" onclick="filterCards('bloqueB')">Bloque B: Dominios</button>
+        <button class="filter-btn" onclick="filterCards('vf')">Verdadero / Falso</button>
+        <button class="filter-btn" onclick="filterCards('orden')">Ordenamiento</button>
+        <button class="filter-btn" onclick="filterCards('casos')">Casos Clínicos</button>
+    </div>
+
+    <div class="stats" id="statsDisplay">Mostrando 60 de 60 fichas</div>
+    <div class="grid-container" id="cardsGrid"></div>
+
+    <script>
+        const cardsData = [
+            // I. RELACIÓN DE COLUMNAS: BLOQUE A (1-10)
+            { cat: "bloqueA", q: "¿Qué es una Etiqueta NANDA?", a: "Nombre clínico de la respuesta humana alterada o vulnerable[cite: 2]." },
+            { cat: "bloqueA", q: "¿Qué define a un Resultado NOC?", a: "Estado esperado medible mediante indicadores y puntuación[cite: 2]." },
+            { cat: "bloqueA", q: "¿Qué es una Intervención NIC?", a: "Conjunto de actividades enfermeras dirigidas al problema identificado[cite: 2]." },
+            { cat: "bloqueA", q: "¿Qué es un Factor relacionado?", a: "Causa, condición o situación asociada al problema[cite: 2]." },
+            { cat: "bloqueA", q: "¿Qué es una Característica definitoria?", a: "Manifestación observable o referida que evidencia un diagnóstico real[cite: 2]." },
+            { cat: "bloqueA", q: "¿Cómo se define un Diagnóstico de riesgo?", a: "Respuesta vulnerable formulada sin signos ni síntomas actuales[cite: 2]." },
+            { cat: "bloqueA", q: "¿Qué mide la Escala EVA?", a: "Instrumento de medición subjetiva de intensidad dolorosa[cite: 2]." },
+            { cat: "bloqueA", q: "¿Qué valora la Escala Braden?", a: "Valora riesgo de lesión por presión mediante seis rubros[cite: 2]." },
+            { cat: "bloqueA", q: "¿Cuál es la función de la Escala Downton?", a: "Identifica riesgo de caídas con antecedentes, medicación y marcha[cite: 2]." },
+            { cat: "bloqueA", q: "¿Qué evalúa la Escala Glasgow?", a: "Evalúa respuesta ocular, verbal y motora[cite: 2]." },
+
+            // I. RELACIÓN DE COLUMNAS: BLOQUE B (11-20)
+            { cat: "bloqueB", q: "¿Qué incluye el Dominio actividad/reposo?", a: "Respuestas vinculadas con sueño, movilidad, energía y tolerancia a la actividad[cite: 2]." },
+            { cat: "bloqueB", q: "¿Qué agrupa el Dominio seguridad/protección?", a: "Respuestas relacionadas con infección, lesiones, traumatismos y protección[cite: 2]." },
+            { cat: "bloqueB", q: "What does Dominio nutrición integrate?", a: "Integra ingesta, metabolismo, hidratación y balance nutricional[cite: 2]." },
+            { cat: "bloqueB", q: "¿Qué incluye el Dominio eliminación/intercambio?", a: "Función urinaria, intestinal, respiratoria y equilibrio ácido-base según respuesta humana[cite: 2]." },
+            { cat: "bloqueB", q: "¿Qué integra el Dominio confort?", a: "Respuestas de dolor, bienestar físico, ambiental y social[cite: 2]." },
+            { cat: "bloqueB", q: "¿Qué abarca el Dominio percepción/cognición?", a: "Incluye atención, orientación, memoria, communication y procesamiento de información[cite: 2]." },
+            { cat: "bloqueB", q: "¿Cuál es el propósito de la Taxonomía NANDA-I?", a: "Clasifica diagnósticos enfermeros por dominios y clases[cite: 2]." },
+            { cat: "bloqueB", q: "¿Cómo se define la Taxonomía NOC?", a: "Clasifica resultados esperados sensibles al cuidado de enfermería[cite: 2]." },
+            { cat: "bloqueB", q: "¿Qué organiza la Taxonomía NIC?", a: "Clasifica intervenciones y actividades enfermeras[cite: 2]." },
+            { cat: "bloqueB", q: "¿Qué es el PLACE?", a: "Documento que organiza valoración, diagnóstico, resultados, intervenciones y evaluación[cite: 2]." },
+
+            // II. VERDADERO O FALSO (21-35)
+            { cat: "vf", q: "V/F: En un diagnóstico real se integran problema, etiología y manifestaciones clínicas.", a: "VERDADERO[cite: 2]." },
+            { cat: "vf", q: "V/F: El diagnóstico de riesgo se formula con características definitorias presentes.", a: "FALSO[cite: 2]." },
+            { cat: "vf", q: "V/F: La evaluación del PLACE compara el estado del paciente con los indicadores NOC.", a: "VERDADERO[cite: 2]." },
+            { cat: "vf", q: "V/F: Una intervención NIC debe elegirse sin relación con el diagnóstico NANDA.", a: "FALSO[cite: 2]." },
+            { cat: "vf", q: "V/F: La escala de Glasgow alcanza una puntuación máxima de 15 puntos.", a: "VERDADERO[cite: 2]." },
+            { cat: "vf", q: "V/F: Una puntuación baja de Braden implica menor riesgo de lesión por presión.", a: "FALSO[cite: 2]." },
+            { cat: "vf", q: "V/F: La escala EVA permite cuantificar la intensidad del dolor percibido.", a: "VERDADERO[cite: 2]." },
+            { cat: "vf", q: "V/F: Downton se utiliza para valorar riesgo de lesión por presión.", a: "FALSO[cite: 2]." },
+            { cat: "vf", q: "V/F: NOC permite seleccionar indicadores para medir evolución clínica.", a: "VERDADERO[cite: 2]." },
+            { cat: "vf", q: "V/F: La estructura P.E. puede utilizarse en diagnósticos de riesgo.", a: "FALSO[cite: 2]." },
+            { cat: "vf", q: "V/F: Las clases NANDA son subdivisiones dentro de un dominio.", a: "VERDADERO[cite: 2]." },
+            { cat: "vf", q: "V/F: Un diagnóstico enfermero debe limitarse al diagnóstico médico.", a: "FALSO[cite: 2]." },
+            { cat: "vf", q: "V/F: El resultado esperado debe ser congruente con el problema valorado.", a: "VERDADERO[cite: 2]." },
+            { cat: "vf", q: "V/F: Glasgow menor o igual a 8 sugiere compromiso neurológico grave.", a: "VERDADERO[cite: 2]." },
+            { cat: "vf", q: "V/F: El dolor agudo debe evaluarse únicamente por signos vitales.", a: "FALSO[cite: 2]." },
+
+            // III. ORDENAMIENTO CLÍNICO (36-45)
+            { cat: "orden", q: "¿Cuál es el orden lógico para estructurar un PLACE después de la valoración clínica?", a: "NANDA -> NOC -> NIC -> evaluación[cite: 2]." },
+            { cat: "orden", q: "¿Cuál es la secuencia más adecuada al valorar dolor postoperatorio?", a: "Preguntar EVA -> localizar dolor -> observar conducta -> registrar respuesta[cite: 2]." },
+            { cat: "orden", q: "¿Qué secuencia se sigue para estimar riesgo de caídas en un adulto mayor hospitalizado?", a: "Revisar antecedentes -> valorar marcha -> identificar fármacos -> calcular Downton[cite: 2]." },
+            { cat: "orden", q: "¿Cuál es el orden estricto de respuesta neurológica evaluado en Glasgow?", a: "Ocular -> verbal -> motora[cite: 2]." },
+            { cat: "orden", q: "¿Qué secuencia correcta sirve para prevenir lesión por presión en paciente inmóvil?", a: "Valorar Braden -> identificar factores de riesgo -> programar cambios de posición -> reevaluar piel[cite: 2]." },
+            { cat: "orden", q: "¿Cuál es el orden correcto para formular la estructura P.E.S.?", a: "Problema -> factor relacionado -> datos clínicos presentes[cite: 2]." },
+            { cat: "orden", q: "¿Cuál es la ruta metodológica para seleccionar un NOC?", a: "Identificar respuesta humana -> definir resultado esperado -> elegir indicadores medibles[cite: 2]." },
+            { cat: "orden", q: "¿Cuál es la ruta metodológica para seleccionar una NIC?", a: "Revisar diagnóstico y NOC -> elegir intervención congruente -> definir actividades[cite: 2]." },
+            { cat: "orden", q: "¿Cuál es el orden correcto jerárquico para clasificar un diagnóstico NANDA?", a: "Dominio -> clase -> etiqueta diagnóstica[cite: 2]." },
+            { cat: "orden", q: "¿Qué secuencia se debe seguir para evaluar correctamente los resultados de enfermería?", a: "Medir indicadores iniciales -> aplicar cuidados -> reevaluar indicadores -> comparar evolución[cite: 2]." },
+
+            // IV. CASOS CLÍNICOS BREVES (46-55)
+            { cat: "casos", q: "[Caso 46] Paciente posquirúrgico con dolor 8/10, posición antálgica y evita moverse. Formulación más congruente:", a: "Dolor agudo r/c agente lesivo físico m/p EVA 8/10 y conducta protectora[cite: 2]." },
+            { cat: "casos", q: "[Caso 47] Paciente encamado, piel húmeda, ingesta disminuida y Braden 11. Diagnóstico preventivo prioritario:", a: "Riesgo de deterioro de la integridad cutánea r/c inmovilidad y humedad[cite: 2]." },
+            { cat: "casos", q: "[Caso 48] Adulto mayor con antecedente de caída, benzodiacepinas y marcha inestable. Escala útil:", a: "Downton[cite: 2]." },
+            { cat: "casos", q: "[Caso 49] Paciente responde al llamado, desorientado y localiza el dolor. Escala para cuantificar:", a: "Glasgow[cite: 2]." },
+            { cat: "casos", q: "[Caso 50] Herida limpia, catéter periférico, DM, sin fiebre ni exudado. Tipo de diagnóstico:", a: "Diagnóstico de riesgo[cite: 2]." },
+            { cat: "casos", q: "[Caso 51] Si el NANDA es 'Riesgo de caídas', ¿qué relación NOC-NIC es la idónea?", a: "Conducta de prevención de caídas / Prevención de caídas[cite: 2]." },
+            { cat: "casos", q: "[Caso 52] Paciente con disnea, músculos accesorios y SatO2 disminuida. Dominio NANDA implicado:", a: "Elimination e intercambio[cite: 2]." },
+            { cat: "casos", q: "[Caso 53] Paciente ansioso, con miedo a procedimientos y dificultad para concentrarse. Dominios:", a: "Percepción/cognición y afrontamiento/tolerancia al estrés[cite: 2]." },
+            { cat: "casos", q: "[Caso 54] Paciente expresa deseo de aprender el manejo de su tratamiento en casa. Estructura diagnóstica:", a: "P.S. (Promoción de la Salud), porque expresa disposición y manifestaciones de mejora[cite: 2]." },
+            { cat: "casos", q: "[Caso 55] Paciente con dolor 0/10 tras intervención analgésica. Acción evaluativa:", a: "Comparar el indicador NOC de dolor con la puntuación inicial[cite: 2]." },
+
+            // V. CLASIFICACIÓN POR DOMINIO NANDA-I (56-60)
+            { cat: "bloqueB", q: "[Situación 56] Identifica el dominio: Pérdida de equilibrio al levantarse de la cama.", a: "Dominio Actividad/Reposo[cite: 2]." },
+            { cat: "bloqueB", q: "[Situación 57] Identifica el dominio: Dificultad para conciliar el sueño por ansiedad.", a: "Dominio Actividad/Reposo[cite: 2]." },
+            { cat: "bloqueB", q: "[Situación 58] Identifica el dominio: Evacuaciones líquidas frecuentes con riesgo de desequilibrio hídrico.", a: "Dominio Eliminación/Intercambio (o Nutrición en balance hídrico)[cite: 2]." },
+            { cat: "bloqueB", q: "[Situación 59] Identifica el dominio: Ingesta oral menor a requerimientos por náusea persistente.", a: "Dominio Nutrición[cite: 2]." },
+            { cat: "bloqueB", q: "[Situación 60] Identifica el dominio: Dolor punzante en sitio quirúrgico con EVA 7/10.", a: "Dominio Confort[cite: 2]." }
+        ];
+
+        function generateCards(cards) {
+            const grid = document.getElementById('cardsGrid');
+            grid.innerHTML = '';
+
+            const categoryLabels = {
+                bloqueA: 'Bloque A: Conceptos',
+                bloqueB: 'Bloque B: Dominios',
+                vf: 'Verdadero / Falso',
+                orden: 'Ordenamiento',
+                casos: 'Casos Clínicos'
+            };
+
+            cards.forEach((c, index) => {
+                const cardEl = document.createElement('div');
+                cardEl.className = 'flashcard';
+                cardEl.innerHTML = `
+                    <div class="card-inner">
+                        <div class="card-front">
+                            <span class="category-tag">${categoryLabels[c.cat] || 'NANDA/NOC/NIC'}</span>
+                            <div style="font-size: 0.75rem; color: var(--primary); font-weight: 700; margin-bottom: 8px;">Ficha #${index + 1}</div>
+                            <div class="question">${c.q}</div>
+                            <div class="hint">Haz clic para ver respuesta</div>
+                        </div>
+                        <div class="card-back">
+                            <span class="category-tag" style="background: #dcfce7; color: #15803d;">Respuesta</span>
+                            <div class="answer">${c.a}</div>
+                            <div class="hint" style="color: var(--muted);">Haz clic para regresar</div>
+                        </div>
+                    </div>
+                `;
+                cardEl.addEventListener('click', () => cardEl.classList.toggle('flipped'));
+                grid.appendChild(cardEl);
+            });
+        }
+
+        function filterCards(category) {
+            document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
+            if(window.event && window.event.target) {
+                window.event.target.classList.add('active');
+            }
+
+            const filtered = category === 'todos' ? cardsData : cardsData.filter(c => c.cat === category);
+            generateCards(filtered);
+            document.getElementById('statsDisplay').innerText = `Mostrando ${filtered.length} de ${cardsData.length} fichas`;
+        }
+
+        // Inicializar todas las tarjetas al cargar la app
+        generateCards(cardsData);
+    </script>
+</body>
+</html>
